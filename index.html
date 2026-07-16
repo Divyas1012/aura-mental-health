@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura — AI Mental Health Companion</title>
+  
+  <!-- Calming styling stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- ==========================================
+         SIDEBAR NAVIGATION
+         ========================================== -->
+    <nav class="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <i class="fas fa-wind"></i>
+        </div>
+        <span class="logo-text">Aura</span>
+      </div>
+      
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a class="nav-link active" data-target="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="chat">
+            <i class="fas fa-comment-medical"></i>
+            <span>Aura Chat</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="breathing">
+            <i class="fas fa-lungs"></i>
+            <span>Breathing</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="soundscapes">
+            <i class="fas fa-music"></i>
+            <span>Soundscapes</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="journal">
+            <i class="fas fa-book"></i>
+            <span>Mood Journal</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="cbt">
+            <i class="fas fa-brain"></i>
+            <span>CBT Reframer</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.25rem; padding: 0 0.5rem;">
+          <div style="display:flex; justify-content:space-between;">
+            <span>Streak:</span>
+            <strong id="sidebarStreak" style="color:var(--accent);">0d</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span>Breathing:</span>
+            <strong id="sidebarBreathe" style="color:var(--secondary);">0m</strong>
+          </div>
+        </div>
+        
+        <button class="theme-toggle-btn" id="themeToggleBtn">
+          <i class="fas fa-sun"></i>
+          <span>Light Mode</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ==========================================
+         MAIN CONTENT AREA
+         ========================================== -->
+    <main class="main-content">
+      
+      <!-- ==========================================
+           1. DASHBOARD VIEW
+           ========================================== -->
+      <section class="view-panel active" id="dashboard">
+        <div class="header">
+          <div class="user-greeting">
+            <h1>Hello, Friend</h1>
+            <p>Welcome to your peaceful space. How is your energy today?</p>
+          </div>
+          <div class="quick-stats">
+            <div class="stat-chip" id="statStreakChip">
+              <i class="fas fa-fire"></i>
+              <span id="statStreak">0 Days</span>
+            </div>
+            <div class="stat-chip" id="statBreatheChip">
+              <i class="fas fa-lungs"></i>
+              <span id="statBreathe">0 Min</span>
+            </div>
+            <div class="stat-chip" id="statStatusChip">
+              <i class="far fa-circle"></i>
+              <span id="statStatus">Mood Unlogged</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-dashboard">
+          <!-- Calming Daily Quote -->
+          <div class="glass-card quote-widget">
+            <div class="quote-content">
+              <p class="quote-text" id="quoteText">"Conscious breathing is my anchor."</p>
+              <span class="quote-author" id="quoteAuthor">— Thich Nhat Hanh</span>
+            </div>
+            <button class="quote-action-btn" id="shuffleQuoteBtn" title="Inspiration Shuffle">
+              <i class="fas fa-redo-alt"></i>
+            </button>
+          </div>
+
+          <!-- Left Column widgets -->
+          <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+            <!-- Mood Trend Mini Canvas -->
+            <div class="glass-card">
+              <h2><i class="fas fa-chart-line"></i> Recent Mood Trend</h2>
+              <div class="canvas-container">
+                <canvas id="dashboardMoodChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Mini Breathing Assistant -->
+            <div class="glass-card breathing-preview-card">
+              <h2><i class="fas fa-heart"></i> Daily Breather</h2>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Settle your mind with a structured cycles pattern.</p>
+              
+              <div class="breathing-sphere-container">
+                <div class="breathing-pulse-ring"></div>
+                <div class="breathing-sphere" id="dash-breathingSphere">
+                  <span>Breathe</span>
+                  <span class="breath-timer" id="dash-breathTimerText"></span>
+                </div>
+              </div>
+              
+              <p class="breathing-instructions" id="dash-breathingInstruction" style="font-size: 0.95rem; margin-bottom: 1.25rem;">Ready to begin...</p>
+              
+              <div class="breathing-controls">
+                <select class="breathing-modes-select" id="dash-breathingPattern">
+                  <option value="calm">Calm & Focus (4-7-8)</option>
+                  <option value="box">Box Breathing (4-4-4-4)</option>
+                  <option value="slow">Slow & Relaxed (5-0-5)</option>
+                </select>
+                <button class="btn-primary" id="dash-startBreathingBtn">Start Session</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column sound mixing dashboard widget -->
+          <div class="glass-card">
+            <h2><i class="fas fa-sliders-h"></i> Ambient Sound Mixer</h2>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">Layer custom organic audio elements to build your perfect focus or rest soundscape.</p>
+            
+            <div class="mixer-list">
+              <!-- Rain -->
+              <div class="mixer-item" data-sound="rain">
+                <div class="mixer-info">
+                  <div class="mixer-icon"><i class="fas fa-cloud-showers-heavy"></i></div>
+                  <span class="mixer-name">Gentle Rain</span>
+                </div>
+                <div class="volume-slider-container">
+                  <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+                </div>
+                <button class="play-toggle-btn"><i class="fas fa-play"></i></button>
+              </div>
+
+              <!-- Ocean Waves -->
+              <div class="mixer-item" data-sound="ocean">
+                <div class="mixer-info">
+                  <div class="mixer-icon"><i class="fas fa-water"></i></div>
+                  <span class="mixer-name">Ocean Swells</span>
+                </div>
+                <div class="volume-slider-container">
+                  <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+                </div>
+                <button class="play-toggle-btn"><i class="fas fa-play"></i></button>
+              </div>
+
+              <!-- Binaural Beats -->
+              <div class="mixer-item" data-sound="binaural">
+                <div class="mixer-info">
+                  <div class="mixer-icon"><i class="fas fa-wave-square"></i></div>
+                  <span class="mixer-name">Binaural Waves</span>
+                </div>
+                <div class="volume-slider-container">
+                  <input type="range" class="volume-slider" min="0" max="0.5" step="0.02" value="0.15">
+                </div>
+                <button class="play-toggle-btn"><i class="fas fa-play"></i></button>
+              </div>
+            </div>
+
+            <!-- Tibetan Singing Bowl instant chime -->
+            <div style="margin-top: 2rem; border-top: 1px solid var(--panel-border); padding-top: 1.5rem; text-align: center;">
+              <button class="btn-secondary" id="playBowlChime" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fas fa-bell"></i> Strike Singing Bowl
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           2. AURA CHAT VIEW
+           ========================================== -->
+      <section class="view-panel" id="chat">
+        <div class="glass-card" style="max-width: 800px; margin: 0 auto; height: 100%;">
+          <h2><i class="fas fa-comment-medical"></i> Aura: Empathetic Companion</h2>
+          <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+            Aura is programmed to listen, provide coping strategies, and support your emotional regulation. Talk about anything.
+          </p>
+
+          <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div class="chat-footer">
+              <div class="chat-suggestions" id="chatSuggestions">
+                <!-- Action chips -->
+              </div>
+              <div class="chat-input-bar">
+                <input type="text" class="chat-input" id="chatInput" placeholder="How are you holding up today?..." autofocus>
+                <button class="chat-send-btn" id="chatSendBtn"><i class="fas fa-paper-plane"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           3. BREATHING VIEW
+           ========================================== -->
+      <section class="view-panel" id="breathing">
+        <div class="glass-card" style="max-width: 750px; margin: 0 auto; text-align: center;">
+          <h2><i class="fas fa-lungs"></i> Deep Breathing Space</h2>
+          <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem;">
+            Rhythmic breathing relaxes the autonomic nervous system. Select your pattern and match your breath to the expanding circle.
+          </p>
+
+          <div class="breathing-full-panel">
+            <div class="full-breathing-sphere-container">
+              <div class="full-breathing-ring"></div>
+              <div class="full-breathing-sphere" id="breathingSphere">
+                <span>Breathe</span>
+                <span class="breath-timer" id="breathTimerText" style="font-size: 1.25rem; font-weight: 500;"></span>
+              </div>
+            </div>
+
+            <p class="breathing-instructions" id="breathingInstruction">Ready when you are...</p>
+
+            <div class="breathing-settings-row">
+              <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+                <label style="font-size:0.8rem; font-weight:600; text-transform:uppercase; color:var(--text-muted);">Select Technique</label>
+                <select class="breathing-modes-select" id="breathingPattern" style="min-width: 250px;">
+                  <option value="calm">Calm & Focus (4-7-8 Method)</option>
+                  <option value="box">Box Breathing (4-4-4-4 Rhythm)</option>
+                  <option value="slow">Slow & Relaxed (5-5 Rhythm)</option>
+                </select>
+              </div>
+              <button class="btn-primary" id="startBreathingBtn" style="padding: 0.9rem 2.5rem; margin-top: 1.3rem;">Start Breathing</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           4. SOUNDSCAPES VIEW
+           ========================================== -->
+      <section class="view-panel" id="soundscapes">
+        <div class="header">
+          <div class="user-greeting">
+            <h1>Relaxing Soundscapes</h1>
+            <p>Programmatic nature and frequency audio generators synthesized locally in your browser.</p>
+          </div>
+        </div>
+
+        <div class="soundscapes-grid">
+          <!-- Rain card -->
+          <div class="glass-card sound-card" data-sound="rain">
+            <div class="mixer-icon"><i class="fas fa-cloud-showers-heavy"></i></div>
+            <h3>Gentle Rain</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">
+              Soft, high-frequency raindrops layered on filtered white noise simulating rain hitting soil and leaves.
+            </p>
+            <div class="volume-slider-container">
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+            </div>
+            <button class="play-toggle-btn"><i class="fas fa-play"></i></button>
+          </div>
+
+          <!-- Ocean card -->
+          <div class="glass-card sound-card" data-sound="ocean">
+            <div class="mixer-icon"><i class="fas fa-water"></i></div>
+            <h3>Ocean Swells</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">
+              Low frequency oscillator (LFO) modulating organic pink noise to simulate swelling tides and receding foam.
+            </p>
+            <div class="volume-slider-container">
+              <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+            </div>
+            <button class="play-toggle-btn"><i class="fas fa-play"></i></button>
+          </div>
+
+          <!-- Binaural Beats Card -->
+          <div class="glass-card sound-card" data-sound="binaural" style="grid-column: span 2;">
+            <div class="mixer-icon"><i class="fas fa-wave-square"></i></div>
+            <h3>Binaural Brainwave Entrainment</h3>
+            <p style="color: var(--text-muted); font-size: 0.875rem; max-width: 600px; line-height: 1.5;">
+              Generates two distinct sine waves in left/right channels. The frequency offset tricks the brain into state synchronization. **Use headphones** for full effect.
+            </p>
+            
+            <!-- Binaural Waves Selector -->
+            <div class="binaural-controls-row">
+              <button class="binaural-freq-btn" data-freq="delta">Delta (2.5 Hz) - Deep Sleep</button>
+              <button class="binaural-freq-btn active" data-freq="theta">Theta (6.0 Hz) - Meditation</button>
+              <button class="binaural-freq-btn" data-freq="alpha">Alpha (10.0 Hz) - Calm Focus</button>
+              <button class="binaural-freq-btn" data-freq="beta">Beta (16.0 Hz) - Cognition</button>
+            </div>
+
+            <div class="volume-slider-container" style="max-width: 400px;">
+              <input type="range" class="volume-slider" min="0" max="0.5" step="0.02" value="0.15">
+            </div>
+            
+            <button class="play-toggle-btn"><i class="fas fa-play"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           5. JOURNAL VIEW
+           ========================================== -->
+      <section class="view-panel" id="journal">
+        <div class="header">
+          <div class="user-greeting">
+            <h1>Mood Diary & Journal</h1>
+            <p>Track emotional states, explore triggers, and review history logs.</p>
+          </div>
+        </div>
+
+        <div class="journal-panel-layout">
+          <!-- Log Mood Form -->
+          <div class="glass-card">
+            <h2><i class="fas fa-pen-fancy"></i> Log Today's State</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">How is your mind feeling right now?</p>
+            
+            <div class="mood-buttons">
+              <button class="mood-btn radiant" data-mood="radiant">
+                <span class="mood-emoji">☀️</span>
+                <span class="mood-label">Radiant</span>
+              </button>
+              <button class="mood-btn peaceful" data-mood="peaceful">
+                <span class="mood-emoji">🌿</span>
+                <span class="mood-label">Peaceful</span>
+              </button>
+              <button class="mood-btn meh" data-mood="meh">
+                <span class="mood-emoji">😐</span>
+                <span class="mood-label">Neutral</span>
+              </button>
+              <button class="mood-btn anxious" data-mood="anxious">
+                <span class="mood-emoji">⚡</span>
+                <span class="mood-label">Anxious</span>
+              </button>
+              <button class="mood-btn down" data-mood="down">
+                <span class="mood-emoji">🌧️</span>
+                <span class="mood-label">Down</span>
+              </button>
+            </div>
+
+            <div class="mood-journal-prompt">
+              <label style="font-size:0.8rem; font-weight:600; text-transform:uppercase; color:var(--text-muted);">Associate Tags</label>
+              <div class="tag-selector">
+                <button class="tag-btn">Work</button>
+                <button class="tag-btn">Sleep</button>
+                <button class="tag-btn">Relationships</button>
+                <button class="tag-btn">Exercise</button>
+                <button class="tag-btn">Health</button>
+                <button class="tag-btn">Hobbies</button>
+                <button class="tag-btn">Diet</button>
+              </div>
+
+              <label style="font-size:0.8rem; font-weight:600; text-transform:uppercase; color:var(--text-muted); margin-top: 0.5rem;">Journal Reflections</label>
+              <textarea class="journal-textarea" id="journalNote" placeholder="Write down whatever you are thinking. Letting thoughts spill onto paper brings clarity..."></textarea>
+
+              <button class="btn-primary" id="saveJournalBtn" style="margin-top: 0.5rem;">Save Entry</button>
+            </div>
+          </div>
+
+          <!-- Chart & Historical Entries list -->
+          <div class="journal-analytics">
+            <div class="glass-card">
+              <h2><i class="fas fa-chart-line"></i> Mood History Tracker</h2>
+              <div class="canvas-container">
+                <canvas id="moodChart"></canvas>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <h2><i class="fas fa-history"></i> Reflection History</h2>
+              <div class="journal-history-list" id="journalHistoryList">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           6. CBT COGNITIVE REFRAMING WIZARD VIEW
+           ========================================== -->
+      <section class="view-panel" id="cbt">
+        <div class="header">
+          <div class="user-greeting">
+            <h1>CBT Thought Reframer</h1>
+            <p>Break negative cycles by identifying distortions and rewriting balanced alternatives.</p>
+          </div>
+        </div>
+
+        <div class="journal-panel-layout">
+          <!-- CBT Wizard Wizard -->
+          <div class="glass-card">
+            <h2><i class="fas fa-magic"></i> Reframing Wizard</h2>
+            
+            <div class="cbt-progress">
+              <div class="cbt-progress-bar" id="cbtProgressBar"></div>
+              <div class="progress-node active">1</div>
+              <div class="progress-node">2</div>
+              <div class="progress-node">3</div>
+            </div>
+
+            <div class="cbt-wizard">
+              <!-- Step 1: Automatic Thought -->
+              <div class="cbt-step active" id="cbtStep1">
+                <h3>Step 1: Automatic Negative Thought</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4;">
+                  Write down the distressing negative thought exactly as it occurred in your mind (e.g. "I'm going to fail my exam and ruin my life.")
+                </p>
+                <textarea class="journal-textarea" id="oldThoughtText" placeholder="Write the thought here..." style="min-height: 120px;"></textarea>
+              </div>
+
+              <!-- Step 2: Choose Distortions -->
+              <div class="cbt-step" id="cbtStep2">
+                <h3>Step 2: Identify Cognitive Distortions</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4; margin-bottom: 0.5rem;">
+                  Our minds often trick us. Select the bias/distortion that applies to this thought:
+                </p>
+                
+                <div class="distortion-grid">
+                  <div class="distortion-card" data-distortion="catastrophizing">
+                    <h4>💥 Catastrophizing</h4>
+                    <p>Assuming the absolute worst-case scenario will happen.</p>
+                  </div>
+                  <div class="distortion-card" data-distortion="all_or_nothing">
+                    <h4>🏁 All-or-Nothing</h4>
+                    <p>Viewing things in extremes. Perfect or failure.</p>
+                  </div>
+                  <div class="distortion-card" data-distortion="mind_reading">
+                    <h4>🧠 Mind Reading</h4>
+                    <p>Assuming you know why others think negatively of you.</p>
+                  </div>
+                  <div class="distortion-card" data-distortion="personalization">
+                    <h4>👤 Personalization</h4>
+                    <p>Blaming yourself entirely for things you can't control.</p>
+                  </div>
+                  <div class="distortion-card" data-distortion="overgeneralization">
+                    <h4>🔄 Overgeneralization</h4>
+                    <p>Assuming one setback is a never-ending cycle.</p>
+                  </div>
+                  <div class="distortion-card" data-distortion="should_statements">
+                    <h4>📢 Shoulds</h4>
+                    <p>Demanding absolute perfection, leading to heavy guilt.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3: Balanced Perspective -->
+              <div class="cbt-step" id="cbtStep3">
+                <h3>Step 3: Develop a Balanced Perspective</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.4;">
+                  Rewrite the thought by looking at the facts. Challenge the distortion. What is a more logical, compassionate, and realistic alternative?
+                </p>
+                <textarea class="journal-textarea" id="balancedThoughtText" placeholder="Write a balanced perspective here..." style="min-height: 120px;"></textarea>
+              </div>
+
+              <!-- Navigation Controls -->
+              <div class="cbt-actions">
+                <button class="btn-secondary" id="prevCbtBtn" style="visibility: hidden;">Back</button>
+                <button class="btn-primary" id="nextCbtBtn">Next</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Reframed Thoughts -->
+          <div class="glass-card">
+            <h2><i class="fas fa-shield-alt"></i> Rebalanced Perspectives</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom: 1.5rem;">Reviewing previously reframed thoughts reinforces logical thinking pathways.</p>
+            
+            <div class="reframed-thoughts-list" id="reframedThoughtsList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Component Scripts Loading -->
+  <script src="audio.js"></script>
+  <script src="chat.js"></script>
+  <script src="breathing.js"></script>
+  <script src="journal.js"></script>
+  <script src="reframing.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
